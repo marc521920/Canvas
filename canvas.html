@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+
+</head>
+
+<body>
+    <script type="application/javascript">
+        var position = 0
+        window.onload = function () {
+            canvasBox();
+            canvasBox2();
+            canvasBox3();
+            canvasBox4();
+            canvasBox5();
+            canvasBox6();
+            canvasBox7();
+            canvasBox8();
+
+        }
+        function canvasBox() {
+            var canvas = document.getElementById("canvas-box");
+            if (canvas.getContext) {
+                var ctx = canvas.getContext("2d");
+                //Un rectangulo rojo
+                ctx.fillStyle = "rgb(200,0,0)";
+                ctx.fillRect(10, 10, 50, 50);
+                //Un rectangulo azul semi-transparente
+                ctx.fillStyle = "rgba(0,200,0,0.5)";
+                ctx.fillRect(30, 30, 100, 100);
+
+                ctx.fillStyle = "rgba(0,0,200,0.8)";
+                ctx.fillRect(50, 50, 60, 60);
+
+
+            }
+        }
+        function canvasBox2() {
+            var canvas = document.getElementById("canvas-box2");
+            if (canvas.getContext) {
+                var ctx = canvas.getContext("2d");
+
+                //Dibujar un rectángulo rojo
+                ctx.fillStyle = "rgb(200,0,0)";
+                ctx.fillRect(25, 25, 100, 100);
+                ctx.clearRect(45, 45, 60, 60);
+                ctx.strokeStyle = "rgba(0,0,200)";
+
+                ctx.strokeRect(50, 50, 50, 50);
+
+            }
+        }
+        function canvasBox3() {
+            var canvas = document.getElementById("canvas-box3");
+            if (canvas.getContext) {
+                var ctx = canvas.getContext("2d");
+                ctx.strokeStyle = "rgba(200,0,0)";
+                ctx.moveTo(30, 30);
+                ctx.lineTo(170, 150);
+                ctx.moveTo(170, 30);
+                ctx.lineTo(30, 150);
+                ctx.stroke();
+
+            }
+        }
+        function canvasBox4() {
+            var canvas = document.getElementById("canvas-box4");
+            if (canvas.getContext) {
+                var ctx = canvas.getContext("2d");
+                ctx.strokeStyle = "rgba(0,255,0)";
+                ctx.lineWidth = 5;
+                ctx.moveTo(100, 20);
+                ctx.lineTo(40, 160);
+                ctx.lineTo(160, 160);
+                ctx.lineTo(100, 20);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.fillStyle = "rgba(0,0,255)";
+                ctx.moveTo(100, 45);
+                ctx.lineTo(60, 140);
+                ctx.lineTo(140, 140);
+                ctx.lineTo(100, 45);
+                ctx.fill();
+
+            }
+        }
+        function canvasBox5() {
+            var canvas = document.getElementById("canvas-box5");
+            if (canvas.getContext) {
+                var ctx = canvas.getContext("2d");
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.arc(100+position,100,70,degToRad(45),degToRad(315));
+                ctx.lineTo(100+position,100);
+                ctx.fillStyle = "rgba(200,200,0)";   
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(100+position,60,6,degToRad(0),degToRad(360));
+                ctx.fillStyle = "rgba(230,230,230)";   
+                ctx.lineWidth = 3; 
+                ctx.stroke();
+                ctx.fill();
+
+
+            }
+        }
+        function canvasBox6() {
+            var canvas = document.getElementById("canvas-box6");
+            if (canvas.getContext) {
+                var ctx = canvas.getContext("2d");
+                var gradient = ctx.createLinearGradient(0, 200, 0, 0);
+                gradient.addColorStop(0, "white");
+                gradient.addColorStop(1, "blue");
+
+                ctx.fillStyle = gradient;
+
+                ctx.fillRect(10, 10, 100, 150);
+                
+                
+            }
+        }
+        function canvasBox7() {
+            var canvas = document.getElementById("canvas-box7");
+            if (canvas.getContext) {
+                var ctx = canvas.getContext("2d");
+                var gradient = ctx.createLinearGradient(0, 0, 100, 100);
+                gradient.addColorStop(0, "white");
+                gradient.addColorStop(1, "green");
+
+                ctx.fillStyle = gradient;
+
+                ctx.fillRect(10, 10, 100, 100);
+                
+                
+            }
+        }
+                function canvasBox8() {
+            var canvas = document.getElementById("canvas-box8");
+            if (canvas.getContext) {
+                var ctx = canvas.getContext("2d");
+                 ctx.scale(1.8,1.8);
+                 ctx.fillStyle = "red";
+                ctx.fillText("M09 UF2",50,100);
+                ctx.beginPath();
+                
+             
+                ctx.strokeStyle = "blue";
+                ctx.strokeText("DAWe",30,20);
+                
+                
+                
+            }
+        }
+        function degToRad(degrees) {
+        return degrees * Math.PI / 180;
+        };
+        window.addEventListener("keydown", function(event) {
+    if(event.key === "ArrowLeft"){
+        position -= 5; // mueve a la izquierda
+        canvasBox5();
+    } else if(event.key === "ArrowRight"){
+        position += 5; // mueve a la derecha
+        canvasBox5();
+    }
+});
+
+
+    </script>
+
+
+    <h1>Yheaa</h1>
+    <canvas id="canvas-box" width="200" height="200" style="border:2px solid #000; box-sizing:border-box;"></canvas>
+    <canvas id="canvas-box2" width="200" height="200" style="border:2px solid #000; box-sizing:border-box;"></canvas>
+    <canvas id="canvas-box3" width="200" height="200" style="border:2px solid #000; box-sizing:border-box;"></canvas>
+    <canvas id="canvas-box4" width="200" height="200" style="border:2px solid #000; box-sizing:border-box;"></canvas>
+    <canvas id="canvas-box5" width="200" height="200" style="border:2px solid #000; box-sizing:border-box;"></canvas>
+    <canvas id="canvas-box6" width="200" height="200" style="border:2px solid #000; box-sizing:border-box;"></canvas>
+    <canvas id="canvas-box7" width="200" height="200" style="border:2px solid #000; box-sizing:border-box;"></canvas>
+    <canvas id="canvas-box8" width="200" height="200" style="border:2px solid #000; box-sizing:border-box;"></canvas>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dual Pixel Art Drawer</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    #editorContainer {
+        display: flex; /* Permite colocar los lienzos lado a lado */
+        gap: 40px; /* Espacio entre los dos editores */
+        margin-top: 20px;
+    }
+    .editor-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    canvas {
+        border: 2px solid #333;
+        cursor: crosshair;
+        display: block;
+        margin-bottom: 10px;
+    }
+    .controls-group {
+        width: 400px; /* Asegura que los controles estén alineados con el canvas */
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    .controls-group h3 {
+        margin: 0 0 10px 0;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
+    }
+    button {
+        padding: 5px 10px;
+        margin-top: 5px;
+        margin-right: 5px;
+        border: 1px solid #ccc;
+        background-color: #f0f0f0;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+    .load-button {
+        background-color: #4CAF50;
+        color: white;
+        border-color: #38761d;
+    }
+    #importMatrixAreaLeft, #importMatrixAreaRight {
+        width: 100%;
+        box-sizing: border-box;
+        margin: 5px 0;
+    }
+</style>
+</head>
+<body>
+
+<h1>Dual Pixel Art Drawer</h1>
+
+<div id="editorContainer">
+    <div class="editor-wrapper">
+        <h2>Lienzo Izquierdo</h2>
+        <canvas id="pixelCanvasLeft" width="400" height="400"></canvas>
+        <div id="controlsLeft" class="controls-group">
+            <h3>Herramientas Izquierda</h3>
+            <label>Color:</label>
+            <input type="color" id="colorPickerLeft" value="#000000">
+            <button id="eraserLeft">Borrar</button>
+            
+            <hr>
+            
+            <h3>Importar y Exportar</h3>
+            <textarea id="importMatrixAreaLeft" placeholder="Pega aquí la matriz JSON (20x20)..." rows="3"></textarea>
+            <button id="importMatrixLeft">Importar Matriz</button>
+            <button id="loadSpriteLeft" class="load-button">Cargar Sprite Ejemplo</button>
+            <button id="generateLeft">Copiar Matriz</button>
+        </div>
+    </div>
+
+    <div class="editor-wrapper">
+        <h2>Lienzo Derecho</h2>
+        <canvas id="pixelCanvasRight" width="400" height="400"></canvas>
+        <div id="controlsRight" class="controls-group">
+            <h3>Herramientas Derecha</h3>
+            <label>Color:</label>
+            <input type="color" id="colorPickerRight" value="#000000">
+            <button id="eraserRight">Borrar</button>
+            
+            <hr>
+            
+            <h3>Importar y Exportar</h3>
+            <textarea id="importMatrixAreaRight" placeholder="Pega aquí la matriz JSON (20x20)..." rows="3"></textarea>
+            <button id="importMatrixRight">Importar Matriz</button>
+            <button id="loadSpriteRight" class="load-button">Cargar Sprite Ejemplo</button>
+            <button id="generateRight">Copiar Matriz</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- DATA DE SPRITE DE EJEMPLO (Se usa para ambos editores) ---
+const SPRITE_DATA = [
+    [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,"#000000","#000000","#000000","#000000",null,null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,"#000000","#b3c1b3","#1c8519","#1c8519","#1c8519","#000000",null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,"#000000","#1c8519","#1c8519","#000000","#1c8519","#1c8519","#1c8519","#000000",null,null,null,null,null,null,null],
+    [null,null,null,null,null,"#000000","#1c8519","#1c8519","#1c8519","#1e6e1b","#1c8519","#1c8519","#000000",null,null,null,null,null,null,null],
+    [null,null,null,null,null,"#000000","#b3c1b3","#1c8519","#1e6e1b","#144413","#1d6f1a","#1b8519","#1c8519","#000000",null,null,null,null,null,null],
+    [null,null,null,null,null,null,"#000000","#000000","#144413","#1e6e1b","#1c8519","#1c8519","#1c8519","#000000",null,null,null,null,null,null],
+    [null,null,null,null,"#030202","#030202","#6b6b6b","#6b6b6b","#6b6b6b","#1c8519","#1c8519","#6b6b6b","#6b6b6b","#6b6b6b","#030202","#030202",null,null,null,null],
+    [null,null,null,"#030202","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#6b6b6b","#6b6b6b","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#030202",null,null,null],
+    [null,null,"#030202","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#030202",null,null],
+    [null,null,"#030202","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#030202",null,null],
+    [null,null,null,"#030202","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#8d918d","#030202",null,null,null],
+    [null,null,null,null,"#030202","#030202","#8d918d","#8d918d","#8d918d","#030202","#030202","#8d918d","#8d918d","#8d918d","#030202","#030202",null,null,null,null],
+    [null,null,null,"#000000","#1c8519","#1c8519","#030202","#030202","#030202",null,null,"#030202","#030202","#030202","#1c8519","#1c8519","#000000",null,null,null],
+    [null,null,"#000000","#1c8519","#1c8519","#000000",null,null,null,null,null,null,null,null,"#000000","#1c8519","#1c8519","#000000",null,null],
+    [null,"#000000","#000000","#1c8519","#000000",null,null,null,null,null,null,null,null,null,null,"#000000","#1c8519","#000000","#000000",null],
+    ["#000000","#1c8519","#000000","#1c8519","#000000",null,null,null,null,null,null,null,null,null,null,"#000000","#1c8519","#000000","#1c8519","#000000"],
+    [null,"#000000","#1c8519","#1c8519","#000000",null,null,null,null,null,null,null,null,null,null,"#000000","#1c8519","#1c8519","#000000",null],
+    [null,null,"#000000","#000000",null,null,null,null,null,null,null,null,null,null,null,null,"#000000","#000000",null,null],
+    [null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null]
+];
+
+
+// --- CLASE PARA MANEJAR UN ÚNICO EDITOR ---
+class PixelArtEditor {
+    constructor(canvasId, controlsPrefix) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext("2d");
+        this.ctx.imageSmoothingEnabled = false;
+
+        this.controlsPrefix = controlsPrefix; // <<-- CORRECCIÓN: Guardamos el prefijo
+        this.rows = 20;
+        this.cols = 20;
+        this.pixelSize = this.canvas.width / this.cols;
+
+        // Propiedades de estado
+        this.pixels = Array.from({length: this.rows}, () => Array(this.cols).fill(null)); // Lienzo en blanco
+        this.currentColor = document.getElementById(`colorPicker${controlsPrefix}`).value;
+        this.isDrawing = false;
+        this.erasing = false;
+
+        // Inicializar
+        this.setupEventListeners(controlsPrefix);
+        this.drawGrid();
+    }
+
+    // --- Métodos de Dibujo ---
+
+    drawGrid() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        for(let y = 0; y < this.rows; y++){
+            for(let x = 0; x < this.cols; x++){
+                this.ctx.fillStyle = this.pixels[y][x] ? this.pixels[y][x] : "white";
+                this.ctx.fillRect(x * this.pixelSize, y * this.pixelSize, this.pixelSize, this.pixelSize);
+                
+                this.ctx.strokeStyle = "gray";
+                this.ctx.strokeRect(x * this.pixelSize, y * this.pixelSize, this.pixelSize, this.pixelSize);
+            }
+        }
+    }
+
+    drawPixelAt(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) / this.pixelSize);
+        const y = Math.floor((e.clientY - rect.top) / this.pixelSize);
+        if(x >= 0 && x < this.cols && y >= 0 && y < this.rows){
+            this.pixels[y][x] = this.erasing ? null : this.currentColor;
+            this.drawGrid();
+        }
+    }
+
+    // --- Métodos de Importación/Exportación ---
+
+    loadPixelArt(data) {
+        if (data.length !== this.rows || (data.length > 0 && data[0].length !== this.cols)) {
+            alert(`Error: La matriz debe ser de ${this.rows}x${this.cols}.`);
+            return;
+        }
+        this.pixels = data.map(row => [...row]); 
+        this.drawGrid();
+    }
+
+    pasteAndLoadMatrix() {
+        // CORRECCIÓN: Usamos this.controlsPrefix para referenciar el textarea correcto
+        const textarea = document.getElementById(`importMatrixArea${this.controlsPrefix}`);
+        const jsonString = textarea.value.trim();
+
+        if (!jsonString) {
+            alert("El área de texto está vacía. Pega la matriz de píxeles (JSON) primero.");
+            return;
+        }
+
+        try {
+            const newMatrix = JSON.parse(jsonString);
+            this.loadPixelArt(newMatrix);
+            alert("¡Matriz importada con éxito!");
+
+        } catch (error) {
+            console.error("Error al importar la matriz:", error);
+            alert("Error al importar: Asegúrate de que el código pegado sea una matriz JSON válida.");
+        }
+    }
+
+    async copyMatrixToClipboard() {
+        const text = JSON.stringify(this.pixels);
+        try {
+            await navigator.clipboard.writeText(text);
+            alert("Tabla copiada al portapapeles.");
+        } catch (err) {
+            alert("Error al copiar. Asegúrate de que tu navegador permita el acceso al portapapeles.");
+        }
+    }
+
+    // --- Configuración de Eventos ---
+
+    setupEventListeners(prefix) {
+        // Eventos de Mouse en el Canvas
+        this.canvas.addEventListener("mousedown", (e) => {
+            this.isDrawing = true;
+            this.drawPixelAt(e);
+        });
+        this.canvas.addEventListener("mousemove", (e) => {
+            if(this.isDrawing){
+                this.drawPixelAt(e);
+            }
+        });
+        this.canvas.addEventListener("mouseup", () => this.isDrawing = false);
+        this.canvas.addEventListener("mouseleave", () => this.isDrawing = false);
+
+        // Controles de Herramientas
+        document.getElementById(`colorPicker${prefix}`).addEventListener("input", (e) => {
+            this.currentColor = e.target.value;
+            this.erasing = false;
+        });
+
+        document.getElementById(`eraser${prefix}`).addEventListener("click", () => {
+            this.erasing = true;
+        });
+
+        // Controles de Importación/Exportación
+        document.getElementById(`importMatrix${prefix}`).addEventListener("click", () => this.pasteAndLoadMatrix());
+        
+        document.getElementById(`loadSprite${prefix}`).addEventListener("click", () => {
+            this.loadPixelArt(SPRITE_DATA);
+        });
+
+        document.getElementById(`generate${prefix}`).addEventListener("click", () => this.copyMatrixToClipboard());
+    }
+}
+
+// --- Inicialización de los Dos Editores ---
+window.addEventListener('DOMContentLoaded', () => {
+    // Inicializa el editor de la izquierda
+    const editorLeft = new PixelArtEditor('pixelCanvasLeft', 'Left');
+
+    // Inicializa el editor de la derecha
+    const editorRight = new PixelArtEditor('pixelCanvasRight', 'Right');
+});
+
+</script>
+
+</body>
+</html>
